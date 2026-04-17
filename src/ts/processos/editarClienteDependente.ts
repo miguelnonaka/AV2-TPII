@@ -1,61 +1,59 @@
 import Processo from "../abstracoes/processo";
 import Armazem from "../dominio/armazem";
-import Cliente from "../modelos/cliente";
+import Telefone from "../modelos/telefone";
 import CadastrarDocumentosCliente from "./cadastrarDocumentosCliente";
 import CadastroEnderecoTitular from "./cadastroEnderecoTitular";
 
-export default class EditarTitular extends Processo {
+export default class EditarDependente extends Processo {
     processar(): void {
         let armazem = Armazem.InstanciaUnica
-        console.log('Iniciando edição de cliente...')
+        console.log('Iniciando edição de dependente...')
 
-        let documento = this.entrada.receberTexto('Informe o documento do cliente:')
+        let documento = this.entrada.receberTexto('Informe o documento do dependente:')
         let cliente = armazem.Clientes.find(c =>
             c.Documentos.some(doc => doc.Numero === documento)
         )
 
+
         if (!cliente) {
             console.log('Cliente não encontrado')
             return
-        } else if (cliente.Titular !== undefined) {
-            console.log('Este Cliente é um dependente')
-            return
         }
 
-        console.log(`Cliente encontrado: ${cliente.Nome}`)
+        if (cliente.Depende == false) {
+            console.log('Este cliente não é dependente')
+            return
+        }
 
         let opcao: number
 
         do {
             console.clear()
-            console.log(`Editando: ${cliente.Nome}\n`)
+            console.log(`Editando dependente: ${cliente.Nome}\n`)
             console.log('1 - Nome')
             console.log('2 - Nome Social')
             console.log('3 - Data de Nascimento')
             console.log('4 - Endereço')
             console.log('5 - Documentos')
-            console.log('6 - Telefone')
+            console.log('6 - Telefones')
             console.log('0 - Sair\n')
 
             opcao = this.entrada.receberNumero('Escolha uma opção:')
 
             switch (opcao) {
                 case 1:
-                    let nome = this.entrada.receberTexto('Novo nome:')
-                    cliente.Nome = nome
+                    cliente.Nome = this.entrada.receberTexto('Novo nome:')
                     console.log('Nome atualizado')
                     break
 
                 case 2:
-                    let nomeSocial = this.entrada.receberTexto('Novo nome social:')
-                    cliente.NomeSocial = nomeSocial
+                    cliente.NomeSocial = this.entrada.receberTexto('Novo nome social:')
                     console.log('Nome social atualizado')
                     break
 
                 case 3:
-                    let dataNascimento = this.entrada.receberData('Nova data de nascimento:')
-                    cliente.DataNascimento = dataNascimento
-                    console.log('Data de nascimento atualizada')
+                    cliente.DataNascimento = this.entrada.receberData('Nova data:')
+                    console.log('Data atualizada')
                     break
 
                 case 4:
@@ -67,32 +65,23 @@ export default class EditarTitular extends Processo {
                     this.processo = new CadastrarDocumentosCliente(cliente)
                     this.processo.processar()
                     break
+
                 case 6:
-
-                    if (cliente.Telefones.length === 0) {
-                        console.log('Cliente não possui telefones')
+                    if (!cliente.Titular) {
+                        console.log('Dependente sem titular definido')
                         break
                     }
 
-                    console.log('Telefones atuais:')
-                    cliente.Telefones.forEach((tel, i) => {
-                        console.log(`${i} - (${tel.Ddd}) ${tel.Numero}`)
-                    })
-
-                    let indice = this.entrada.receberNumero('Escolha o índice do telefone:')
-                    let telefone = cliente.Telefones[indice]
-                    if (!telefone) {
-                        console.log('Telefone inválido')
+                    if (cliente.Titular.Telefones.length === 0) {
+                        console.log('Titular não possui telefones')
                         break
                     }
-                    
-                    let novoDdd = this.entrada.receberTexto('Novo DDD:')
-                    let novoNumero = this.entrada.receberTexto('Novo número:')
-                    telefone.Ddd = novoDdd
-                    telefone.Numero = novoNumero
 
-                    console.log('Telefone atualizado')
+                    cliente.Telefones = cliente.Titular.Telefones.map(t => t.clonar() as Telefone)
+
+                    console.log('Telefones atualizados com base no titular')
                     break
+
                 case 0:
                     break
 
@@ -106,6 +95,6 @@ export default class EditarTitular extends Processo {
 
         } while (opcao !== 0)
 
-        console.log('Finalizando edição do cliente...')
+        console.log('Finalizando edição do dependente...')
     }
 }

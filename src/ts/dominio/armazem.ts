@@ -10,5 +10,8 @@ export default class Armazem {
     public get Clientes() {
         return this.clientes
     }
-
+    
+    public set Clientes(clientes: Cliente[]) {
+        this.clientes = clientes
+    }
 }

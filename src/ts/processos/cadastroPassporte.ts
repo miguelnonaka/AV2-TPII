@@ -3,7 +3,7 @@ import { TipoDocumento } from "../enumeracoes/TipoDocumento";
 import Cliente from "../modelos/cliente";
 import Documento from "../modelos/documento";
 
-export default class CadastroRg extends Processo {
+export default class CadastroPassporte extends Processo {
     private cliente: Cliente
     constructor(cliente: Cliente) {
         super()
@@ -14,6 +14,9 @@ export default class CadastroRg extends Processo {
         let numero = this.entrada.receberTexto('Qual o número do documento?')
         let dataExpedicao = this.entrada.receberData('Qual a data de expedição do documento?')
         let rg = new Documento(numero, TipoDocumento.Passaporte, dataExpedicao)
+        while (rg.Numero == undefined){
+            numero = this.entrada.receberTexto('Qual o número do documento? Você não preencheu corretamente')
+        }
         this.cliente.Documentos.push(rg)
     }
 }
